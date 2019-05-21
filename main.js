@@ -11,7 +11,7 @@ const ticksType = TicksOptions.DOWN;
 
 const graphObject = {};
 graphObject.dims = {width:800, height:600};
-graphObject.margins = {top:10, bottom:10, left:10, right:10};
+graphObject.margins = {top:25, bottom:25, left:25, right:25};
 graphObject.axisOptions = AxisOptions.BOTTOMLEFT;
 graphObject.ticksOptions = TicksOptions.RIGHT;
 graphObject.xLabel = "";
@@ -19,6 +19,7 @@ graphObject.yLabel = "";
 graphObject.graphLegendOption = true; // Analyse Options
 graphObject.allowZoom = true;
 graphObject.allowBrush = true;
+graphObject.dataset = [[10,40],[20,30],[30,5],[40,20],[50, 70]];
 
 const divHistogramGraph = d3.select("#HistogramGraph");
 
