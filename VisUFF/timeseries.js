@@ -4,15 +4,35 @@ class TimeSeries extends BaseGraph
   {
     super(divHistogram, graphConfig);
   }
-  
-  initGraph()
+
+  initAxis()
   {
-    console.log("Criando TimeSeries");
-    // this.mainSVG.selectAll("p")
-    //     .data(this._graphConfig.dataset)
-    //     .enter()
-    //     .append("p")
-    //     .text((d) => {return `text-${d}`});
+
+  }
+
+  initEvents()
+  {
+    
+  }
+
+  preprocessDataset(dataset)
+  {
+
+  }
+
+  configureAxis(dataset)
+  {
+    
+  }
+
+  showDataset(dataset)
+  {
+
+  }
+
+  plotLegend(dataset)
+  {
+
   }
 
 }

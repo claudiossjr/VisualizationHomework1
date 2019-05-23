@@ -7,16 +7,10 @@ class HistogramGroup extends BaseGraph
   
   initAxis()
   {
-    console.log("Initializing Axis");
     this.xScale = d3.scaleBand();
     this.xStepScale = d3.scaleBand();
     this.yScale = d3.scaleLinear();
     this.cScale = d3.scaleOrdinal();
-  }
-
-  initGraph()
-  {
-    console.log("Criando Grupo Histograma");
   }
   
   initEvents()
@@ -24,48 +18,31 @@ class HistogramGroup extends BaseGraph
   
   }
 
-  plotDataset(dataset)
-  {
-    console.log("Plotting Dataset.");
-    // console.log(dataset.dataset);
-    this.preprocessDataset(dataset);
-    console.log(dataset);
-    this.configureAxis(dataset);
-    this.showDataset(dataset);
-  }
-
   preprocessDataset(data)
   {
-    console.log("Start Preprocessing.");
-    let minValue = 0;
-    let maxValue = 0;
+    let minValue = Number.MAX_VALUE;
+    let maxValue = Number.MIN_VALUE;
     data.states = data.dataset.map(element => {
       return element.state;
     });
 
     data.dataset.forEach((element) => {
-      data.classes.forEach((classElem) => {
-        // console.log(element.data[classElem]);
-        element.data.forEach((elemItem) => {
-          const classElemValue = elemItem[1];
-          if (classElemValue < minValue)
-          {
-            minValue = classElemValue;
-          }
+      element.data.forEach((elemItem) => {
+        const classElemValue = elemItem[1];
+        if (classElemValue < minValue)
+        {
+          minValue = classElemValue;
+        }
 
-          if (classElemValue > maxValue)
-          {
-            maxValue = classElemValue;
-          }
-        });
+        if (classElemValue > maxValue)
+        {
+          maxValue = classElemValue;
+        }
       });
     });
 
-    data.minValue = minValue;
+    data.minValue = minValue *0.7;
     data.maxValue = maxValue;
-
-    // console.log("MinValue", minValue);
-    // console.log("MaxValue", maxValue);
   }
 
   configureAxis(dataset)
@@ -75,16 +52,14 @@ class HistogramGroup extends BaseGraph
     this.xScale
         .domain(dataset.states)
         .range([0,this.cw])
-        .paddingInner(.5)
-        .paddingOuter(0)
+        .paddingInner(.05)
+        .paddingOuter(.02)
         .round(true);
 
     this.barWidth = Math.round((this.xScale.bandwidth()/dataset.classes.length)-this.xScale.paddingInner());
     this.xStepScale
         .domain(dataset.classes)
-        .range([0,this.xScale.bandwidth()])
-        .paddingInner(.5)
-        .paddingOuter(0);
+        .range([0,this.xScale.bandwidth()]);
 
     // Create yScale
     const yDomain = [dataset.minValue, dataset.maxValue];
@@ -106,13 +81,13 @@ class HistogramGroup extends BaseGraph
     
     this.cScale
         .domain(dataset.classes)
-        .range(['yellow', 'brown', 'black', 'red', 'green', 'blue', 'gray']);
+        .range(randomColor(dataset.classes.length));
 
   }
 
   showDataset(dataset)
   {
-    this.stateArea = this.dataArea
+    this.stateArea = this.dataGroup
         .selectAll('.state')
         .data(dataset.dataset)
         .enter()
@@ -121,6 +96,37 @@ class HistogramGroup extends BaseGraph
         .attr('transform', (data) => {return `translate(${this.xScale(data.state)},0)`;});
     
     this.appendBars(this.stateArea);
+  }
+
+  plotLegend(dataset)
+  {
+
+    const legendScale = d3.scaleBand()
+                          .domain(dataset.classes)
+                          .range([20,this.ch]);
+
+    this.mainSVG
+        .append('text')
+        .attr('transform', `translate(${this._graphConfig.dims.width - this._graphConfig.margins.right + 30},${this._graphConfig.margins.top})`)
+        .text('Graph Legend');
+    this.legendGroup
+        .selectAll('rect')
+        .data(dataset.classes)
+        .enter()
+        .append('rect')
+        .attr('x',`${10}`)
+        .attr('y', (d)=>{return legendScale(d);})
+        .attr('width', `${20}`)
+        .attr('height', `${20}`)
+        .style('fill', (d)=>{return this.cScale(d)});
+    this.legendGroup
+        .selectAll('text')
+        .data(dataset.classes)
+        .enter()
+        .append('text')
+        .attr('x',`${10+30}`)
+        .attr('y', (d)=>{return legendScale(d)+13;})
+        .text((d)=>{return d;});
   }
 
   appendBars(groupArea)

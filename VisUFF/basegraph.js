@@ -11,6 +11,16 @@ var TicksOptions = {
   RIGHT: 3
 };
 
+function randomColor(numberOfClasses)
+{
+  let colors = [];
+  for(let i = 0; i < numberOfClasses; i++)
+  {
+    colors.push(`rgba(${Math.random()*255},${Math.random()*255},${Math.random()*255}, ${0.1+(Math.random()*0.7)})`);
+  }
+  return colors;
+}
+
 class BaseGraph
 {
   constructor (divHistogram, graphConfig)
@@ -25,7 +35,8 @@ class BaseGraph
     this.initSVGs();
     this.initAxis();
     this.initEvents();
-    this.initGraph();
+    if(this._graphConfig.allowLegend)
+      this.initLegend();
   }
 
   initSVGs()
@@ -38,7 +49,7 @@ class BaseGraph
     // init DataGroupArea
     this.cw = this._graphConfig.dims.width   - this._graphConfig.margins.left  -  this._graphConfig.margins.right;
     this.ch = this._graphConfig.dims.height  - this._graphConfig.margins.top   -  this._graphConfig.margins.bottom;
-    this.dataArea = this.mainSVG.append('g')
+    this.dataGroup = this.mainSVG.append('g')
         .attr('width',this.cw)
         .attr('height',this.ch)
         .attr('transform', `translate(${this._graphConfig.margins.left}, ${this._graphConfig.margins.top})`);
@@ -62,6 +73,15 @@ class BaseGraph
     // init anotherComponents
   }
 
+  initLegend()
+  {
+    this.legendGroup = this.mainSVG
+        .append('g')
+        .attr('width',`${this._graphConfig.legendWidth}`)
+        .attr('height',`${this._graphConfig.ch}`)
+        .attr('transform', `translate(${this._graphConfig.dims.width - this._graphConfig.margins.right + 30},${this._graphConfig.margins.top})`);
+  }
+
   initAxis()
   {
     throw new Error("Init Axis Not Implemented.");
@@ -72,25 +92,39 @@ class BaseGraph
     throw new Error("Init Events Not Implemented.");
   }
 
-  initGraph()
-  {
-    throw new Error("Init Graph Not Implemented.");
-  }
-
   preprocessDataset(dataset)
   {
-    throw new Error("Preprocess Not Implemented.");
+    throw new Error("Preprocess Dataset Not Implemented.");
+  }
+
+  configureAxis(dataset)
+  {
+    throw new Error("Axis Not Configured.");
+  }
+
+  showDataset(dataset)
+  {
+    throw new Error("ShowDataset not implemented.");
+  }
+
+  plotLegend(dataset)
+  {
+    throw new Error("PlotLegend Not Implemented.");
+  }
+
+  plotLegend(dataset)
+  {
+    throw new Error("Plot Legend Not Implemented");
   }
 
   plotDataset(dataset)
   {
-    throw new Error("PlotDataset Not Implemented.");
+    this.preprocessDataset(dataset);
+    this.configureAxis(dataset);
+    this.showDataset(dataset);
+    if (this._graphConfig.allowLegend)
+    {
+      this.plotLegend(dataset);
+    }
   }
-
-  updateDataset(nDataset)
-  {
-    this._graphConfig.dataset = nDataset;
-    // Atualizar visualização 
-  }
-
 }
