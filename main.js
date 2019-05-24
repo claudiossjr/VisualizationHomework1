@@ -35,6 +35,8 @@ d3.json("datasets/histogramData.json").then((data, error)=>{
 const divScatterPlot = d3.select('#ScatterPlot');
 const scatterPlot = new ScatterPlot(divScatterPlot,graphObject);
 d3.csv("datasets/scatterPlotData.csv").then((data,error) => {
+  scatterPlot.setAxiNameX("MidPrice");
+  scatterPlot.setAxiNameY("Horsepower");
   scatterPlot.plotDataset(data);
 });
 

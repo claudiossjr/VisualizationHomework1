@@ -1,13 +1,13 @@
 {
-  "Meta Data": {
+  "MetaData": {
       "Information": "Intraday (15min) open, high, low, close prices and volume",
       "Symbol": "PETR3.SA",
-      "Last Refreshed": "2019-05-22 15:45:00",
+      "LastRefreshed": "2019-05-22 15:45:00",
       "Interval": "15min",
-      "Output Size": "Full size",
-      "ime Zone": "US/Eastern"
+      "OutputSize": "Full size",
+      "imeZone": "US/Eastern"
   },
-  "Time Series (15min)": {
+  "TimeSeries": {
       "2019-05-22 15:45:00": {
           "open": "28.7400",
           "high": "28.8000",

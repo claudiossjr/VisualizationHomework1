@@ -4,6 +4,18 @@ class ScatterPlot extends BaseGraph
   constructor(divHistogram, graphConfig)
   {
     super(divHistogram, graphConfig);
+    this.axiNameX = "";
+    this.axiNameY = "";
+  }
+
+  setAxiNameX(name)
+  {
+    this.axiNameX = name;
+  }
+
+  setAxiNameY(name)
+  {
+    this.axiNameY = name;
   }
 
   initAxis()
@@ -33,7 +45,7 @@ class ScatterPlot extends BaseGraph
 
     // x Axi Horsepower
     dataset.forEach((data)=>{
-      const horsepower = Number(data.Horsepower);
+      const horsepower = Number(data[this.axiNameX]);
       if (horsepower < minValue)
       {
         minValue = horsepower;
@@ -52,7 +64,7 @@ class ScatterPlot extends BaseGraph
 
     // y Axi Cylinders
     dataset.forEach((data) => {
-      const cylinders = Number(data.Cylinders);
+      const cylinders = Number(data[this.axiNameY]);
       if (cylinders < minValue)
       {
         minValue = cylinders;
@@ -72,8 +84,8 @@ class ScatterPlot extends BaseGraph
     // console.log(horsepowerList);
 
     
-    console.log(dataset.makes);
-    console.log(dataset);
+    // console.log(dataset.makes);
+    // console.log(dataset);
   }
 
   configureAxis(dataset)
@@ -108,8 +120,8 @@ class ScatterPlot extends BaseGraph
         .data(dataset)
         .enter()
         .append('circle')
-        .attr('cx', (d) => {return this.xScale(d.Horsepower);})
-        .attr('cy', (d) => {return this.yScale(d.Cylinders);})
+        .attr('cx', (d) => {return this.xScale(d[this.axiNameX]);})
+        .attr('cy', (d) => {return this.yScale(d[this.axiNameY]);})
         .attr('r', 5)
         .style('fill', (d) => {return this.cScale(d.Make);} )
   }

@@ -52,8 +52,8 @@ class HistogramGroup extends BaseGraph
     this.xScale
         .domain(dataset.states)
         .range([0,this.cw])
-        .paddingInner(.05)
-        .paddingOuter(.02)
+        .paddingInner(.1)
+        .paddingOuter(.05)
         .round(true);
 
     this.barWidth = Math.round((this.xScale.bandwidth()/dataset.classes.length)-this.xScale.paddingInner());
