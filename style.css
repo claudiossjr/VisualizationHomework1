@@ -11,3 +11,7 @@ text{
   font-size: 12px;
   text-align: center;
 }
+
+path{
+  fill: none;
+}

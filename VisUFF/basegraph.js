@@ -16,7 +16,7 @@ function randomColor(numberOfClasses)
   let colors = [];
   for(let i = 0; i < numberOfClasses; i++)
   {
-    colors.push(`rgba(${Math.random()*255},${Math.random()*255},${Math.random()*255}, ${0.1+(Math.random()*0.7)})`);
+    colors.push(`rgba(${Math.ceil(Math.random()*255)},${Math.ceil(Math.random()*255)},${Math.ceil(Math.random()*255)}, ${Math.ceil((0.1+Math.random())*0.7)})`);
   }
   return colors;
 }
@@ -78,8 +78,8 @@ class BaseGraph
     this.legendGroup = this.mainSVG
         .append('g')
         .attr('width',`${this._graphConfig.legendWidth}`)
-        .attr('height',`${this._graphConfig.ch}`)
-        .attr('transform', `translate(${this._graphConfig.dims.width - this._graphConfig.margins.right + 30},${this._graphConfig.margins.top})`);
+        .attr('height',`${this.ch}`)
+        .attr('transform', `translate(${this._graphConfig.dims.width - this._graphConfig.margins.right + 40},${this._graphConfig.margins.top})`);
   }
 
   initAxis()

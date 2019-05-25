@@ -37,7 +37,7 @@ class TimeSeries extends BaseGraph
         const date = new Date(key);
         tempArray.push({"date":date, "price":info});
       }
-
+      
       const arrayMin = d3.min(tempArray, (d) => {
         return d.price;
       });
@@ -58,15 +58,12 @@ class TimeSeries extends BaseGraph
 
       dataset.info.push({"key":data, "value": tempArray});
     });
-    console.log(dataset);
-    console.log(dataset.info[0]);
 
-    // Find data intervals
-    const xMin = d3.min(dataset.info[0].value.date, (d) => {
+    const xMin = d3.min(dataset.info[0].value, (d) => {
       return d.date;
     });
 
-    const xMax = d3.max(dataset.info[0].value.date, (d) => {
+    const xMax = d3.max(dataset.info[0].value, (d) => {
       return d.date;
     });
 
@@ -108,29 +105,60 @@ class TimeSeries extends BaseGraph
 
   showDataset(dataset)
   {
-    // generates close price line chart when called
-    const line = d3
-    .line()
-    .x(d => {
-      return xScale(d['date']);
+    dataset.info.forEach((dataInfo)=>{
+      this.appendData(dataInfo);
+    });    
+  }
+
+  appendData(dataInfo)
+  {
+    const line = d3.line()
+    .x((d) => {
+      return this.xScale(d.date);
     })
-    .y(d => {
-      return yScale(d['close']);
+    .y((d) => {
+      return this.yScale(d.price);
     });
-    // Append the path and bind data
-    svg
-    .append('path')
-    .data(dataset.info)
-    .style('fill', 'none')
-    .attr('id', 'priceChart')
-    .attr('stroke', (d)=>{return this.cScale();})
-    .attr('stroke-width', '1.5')
-    .attr('d', line);
+
+    const lineColor = this.cScale(dataInfo.key);
+    this.dataGroup
+        .append('path')
+        .data([dataInfo.value])
+        .attr('id', `priceChart-${dataInfo.key}`)
+        .attr('stroke', `${lineColor}`)
+        .attr('stroke-width', '1.5')
+        .attr('d', line);
   }
 
   plotLegend(dataset)
   {
+    // console.log(dataset);
+    const legendScale = d3.scaleBand()
+                          .domain(dataset.info.map(d => {return d.key;}))
+                          .range([20,this.ch]);
+    this.mainSVG
+        .append('text')
+        .attr('transform', `translate(${this._graphConfig.dims.width - this._graphConfig.margins.right + 40},${this._graphConfig.margins.top})`)
+        .text('Graph Legend');
 
+    this.legendGroup
+        .selectAll('rect')
+        .data(dataset.info.map(d => {return d.key;}))
+        .enter()
+        .append('rect')
+        .attr('x',`${10}`)
+        .attr('y', (d)=>{return legendScale(d);})
+        .attr('width', `${5}`)
+        .attr('height', `${5}`)
+        .style('fill', (d)=>{return this.cScale(d)})
+    this.legendGroup
+        .selectAll('text')
+        .data(dataset.info.map(d => {return d.key;}))
+        .enter()
+        .append('text')
+        .attr('x',`${10 + 10}`)
+        .attr('y', (d)=>{return legendScale(d) + 5;})
+        .text((d) => { return d;});
   }
 
 }

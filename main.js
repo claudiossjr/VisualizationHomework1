@@ -24,7 +24,6 @@ graphObject.yLabel = "";
 graphObject.allowLegend = true; // Analyse Options
 graphObject.allowZoom = true;
 graphObject.allowBrush = true;
-// graphObject.dataset = [[10,40],[20,30],[30,5],[40,20],[50, 70]];
 
 const divHistogramGraph = d3.select("#HistogramGraph");
 const histogramGraph = new HistogramGroup(divHistogramGraph, graphObject);
