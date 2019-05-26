@@ -11,6 +11,36 @@ var TicksOptions = {
   RIGHT: 3
 };
 
+function parseDate(strDate)
+{
+  arrayDate = [];
+  acc = "";
+  let iElem = 0;
+  while(iElem <= strDate.length)
+  {
+    const token = strDate[iElem];
+    if(token === "-" 
+    || token === " " 
+    || token === ":")
+    {
+      arrayDate.push(Number.parseInt(acc));
+      acc = "";
+    }
+    else if(iElem === strDate.length - 1)
+    {
+      acc += token;
+      arrayDate.push(Number.parseInt(acc));
+      acc = "";
+    }
+    else
+    {
+      acc += token;
+    }
+    iElem ++;
+  }
+  return arrayDate;
+}
+
 function randomColor(numberOfClasses)
 {
   let colors = [];

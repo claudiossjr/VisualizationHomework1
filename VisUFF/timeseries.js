@@ -34,7 +34,8 @@ class TimeSeries extends BaseGraph
       {
         const stepInfo = dataset.TimeSeries[key];
         const info = Number.parseFloat(stepInfo[data]);
-        const date = new Date(key);
+        const arrDate = parseDate(key);
+        const date = new Date(arrDate[0],arrDate[1]-1,arrDate[2], arrDate[3],arrDate[4], arrDate[5]);
         tempArray.push({"date":date, "price":info});
       }
       
@@ -132,7 +133,6 @@ class TimeSeries extends BaseGraph
 
   plotLegend(dataset)
   {
-    // console.log(dataset);
     const legendScale = d3.scaleBand()
                           .domain(dataset.info.map(d => {return d.key;}))
                           .range([20,this.ch]);
