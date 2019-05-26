@@ -35,6 +35,7 @@ class TimeSeries extends BaseGraph
         const stepInfo = dataset.TimeSeries[key];
         const info = Number.parseFloat(stepInfo[data]);
         const arrDate = parseDate(key);
+        alert(arrDate);
         const date = new Date(arrDate[0],arrDate[1]-1,arrDate[2], arrDate[3],arrDate[4], arrDate[5]);
         tempArray.push({"date":date, "price":info});
       }
