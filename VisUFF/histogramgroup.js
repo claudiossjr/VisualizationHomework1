@@ -43,7 +43,7 @@ class HistogramGroup extends BaseGraph
   initEvents()
   {
     this.brush = d3.brushX()
-        .extent([[0, 0], [0, 10]])
+        .extent([[0, 0], [this.cw, this.ch]])
         .on("start brush", this.brushed.bind(this));
 
     this.dataGroup
