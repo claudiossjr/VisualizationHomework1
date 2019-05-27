@@ -2,6 +2,7 @@ class TimeSeries extends BaseGraph
 {
   constructor(divHistogram, graphConfig)
   {
+    //graphConfig.margins.left = 10;
     super(divHistogram, graphConfig);
   }
 
@@ -11,12 +12,48 @@ class TimeSeries extends BaseGraph
     this.yScale = d3.scaleLinear();
     this.cScale = d3.scaleOrdinal();
     this.infoToLookUp = ['open','high','low', 'closure'];
-    // Include Volume as a differente line
+  }
+
+  brushed()
+  {        
+    var s = d3.event.selection,
+        x0 = s[0],
+        x1 = s[1];
+
+    this.dataGroup
+        .selectAll('line')
+        .style("stroke-width", (d) =>
+        {
+          if(d.class !== undefined)
+          {
+            console.log(d.class);
+            const xPositionIni = this.xScale(d.state) + this.xStepScale(d.class);
+            const xPositionEnd = this.xScale(d.state) + this.xStepScale(d.class) + this.barWidth;
+            if ((xPositionIni >= x0 && xPositionIni <= x1) || (xPositionEnd >= x0 && xPositionEnd <= x1))
+            { 
+              return 1.5;
+            }
+            else 
+            { 
+              return 0;
+            }
+          }
+        });        
   }
 
   initEvents()
   {
-    
+    this.brush = d3.brushX()
+        .extent([[0, 0], [this.cw, 50]])
+        .on("start brush", this.brushed.bind(this));
+
+    this.mainSVG
+        .append("g")
+        .attr("class", "brush")
+        .attr('width', this.cw)
+        .attr('height', 30)
+        .attr('transform', `translate(${this._graphConfig.margins.left},${this._graphConfig.dims.height - this._graphConfig.margins.bottom + 30})`)
+        .call(this.brush);   
   }
 
   preprocessDataset(dataset)
@@ -84,7 +121,7 @@ class TimeSeries extends BaseGraph
         .range([0, this.cw]);
 
     this.yScale
-        .domain([dataset.yMinValue, dataset.yMaxValue])
+        .domain([dataset.yMinValue-1, dataset.yMaxValue+1])
         .range([this.ch, 0]);
     
     this.xAxisGroup = this.mainSVG.append('g')
@@ -102,6 +139,12 @@ class TimeSeries extends BaseGraph
     this.cScale
         .domain(this.infoToLookUp)
         .range(randomColor(this.infoToLookUp.length));
+
+    this.xAxisGroupZoom = this.mainSVG.append('g')
+        .attr('class', 'xAxis')
+        .attr('transform', `translate(${this._graphConfig.margins.left}, ${this._graphConfig.margins.top + this.ch + (this._graphConfig.margins.bottom/2)})`);
+    this.xAxis = d3.axisBottom(this.xScale);
+    this.xAxisGroupZoom.call(this.xAxis);
   }
 
   showDataset(dataset)
@@ -125,6 +168,7 @@ class TimeSeries extends BaseGraph
     this.dataGroup
         .append('path')
         .data([dataInfo.value])
+        .attr('class', 'draphInfo')
         .attr('id', `priceChart-${dataInfo.key}`)
         .attr('stroke', `${lineColor}`)
         .attr('stroke-width', '1.5')

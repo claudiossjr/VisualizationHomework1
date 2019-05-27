@@ -46,7 +46,7 @@ function randomColor(numberOfClasses)
   let colors = [];
   for(let i = 0; i < numberOfClasses; i++)
   {
-    colors.push(`rgba(${Math.ceil(Math.random()*255)},${Math.ceil(Math.random()*255)},${Math.ceil(Math.random()*255)}, ${Math.ceil((0.1+Math.random())*0.7)})`);
+    colors.push(`rgba(${Math.ceil(Math.random()*255)},${Math.ceil(Math.random()*255)},${Math.ceil(Math.random()*255)}, ${Math.ceil((Math.random())*0.7)})`);
   }
   return colors;
 }
@@ -86,20 +86,12 @@ class BaseGraph
 
     // init axisGroup
     this.xScale = undefined;
-    // d3.scaleLinear()
-    //     .domain([0,100])//['Rio de Janeiro', 'São Paulo'])
-    //     .range([0,this.cw]);
     this.yScale = undefined;
-    // d3.scaleLinear()
-    //     .domain([0,100])
-    //     .range([this.ch,0]);
-    
+
     // Axis Group
     this.xAxisGroup = undefined;
-
     this.yAxisGroup = undefined;
-    
-
+  
     // init anotherComponents
   }
 

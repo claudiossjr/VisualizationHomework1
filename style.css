@@ -12,6 +12,14 @@ text{
   text-align: center;
 }
 
-path{
+path.draphInfo{
   fill: none;
+}
+
+circle{
+  stroke: black;
+}
+
+.barInfo {
+  stroke: black;  
 }

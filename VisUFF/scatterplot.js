@@ -25,9 +25,42 @@ class ScatterPlot extends BaseGraph
     this.cScale = d3.scaleOrdinal();
   }
 
+  brushed()
+  {        
+    console.log(d3.event);
+    var s = d3.event.selection,
+        x0 = s[0][0],
+        y0 = s[0][1],
+        x1 = s[1][0],
+        y1 = s[1][1];
+
+    this.dataGroup
+        .selectAll('circle')
+        .style("stroke-width", (d) =>
+        {
+          if ((this.xScale(d[this.axiNameX]) >= x0 && this.xScale(d[this.axiNameX]) <= x1) && 
+              (this.yScale(d[this.axiNameY]) >= y0 && this.yScale(d[this.axiNameY]) <= y1))
+          { 
+            return 1.5;
+          }
+          else 
+          { 
+            return 0;
+          }
+        });        
+  }
+
   initEvents()
   {
-    
+    this.brush = d3.brush()
+        .extent([[0, 0], [this.cw, this.ch]])
+        .on("start brush", this.brushed.bind(this));
+
+    this.dataGroup
+        .append("g")
+        .attr("class", "brush")
+        .attr('width', this.cw)
+        .call(this.brush);   
   }
 
   preprocessDataset(dataset)
@@ -43,16 +76,16 @@ class ScatterPlot extends BaseGraph
     let minValue = Number.MAX_VALUE;
     let maxValue = Number.MIN_VALUE;
 
-    // x Axi Horsepower
+    // x Axi xAxiValue
     dataset.forEach((data)=>{
-      const horsepower = Number(data[this.axiNameX]);
-      if (horsepower < minValue)
+      const xAxiValue = Number(data[this.axiNameX]);
+      if (xAxiValue < minValue)
       {
-        minValue = horsepower;
+        minValue = xAxiValue;
       }
-      if (horsepower > maxValue)
+      if (xAxiValue > maxValue)
       {
-        maxValue = horsepower;
+        maxValue = xAxiValue;
       }
     });
 
@@ -62,30 +95,21 @@ class ScatterPlot extends BaseGraph
     minValue = Number.MAX_VALUE;
     maxValue = Number.MIN_VALUE;
 
-    // y Axi Cylinders
+    // y Axi yAxiValue
     dataset.forEach((data) => {
-      const cylinders = Number(data[this.axiNameY]);
-      if (cylinders < minValue)
+      const yAxiValue = Number(data[this.axiNameY]);
+      if (yAxiValue < minValue)
       {
-        minValue = cylinders;
+        minValue = yAxiValue;
       }
-      if (cylinders > maxValue)
+      if (yAxiValue > maxValue)
       {
-        maxValue = cylinders;
+        maxValue = yAxiValue;
       }
     });
 
     dataset.yMinValue = Math.round(minValue * 0.8);
     dataset.yMaxValue = maxValue;
-
-    // const horsepowerList = dataset.map((data)=>{
-    //   return Number(data.Horsepower);
-    // });
-    // console.log(horsepowerList);
-
-    
-    // console.log(dataset.makes);
-    // console.log(dataset);
   }
 
   configureAxis(dataset)
@@ -95,7 +119,7 @@ class ScatterPlot extends BaseGraph
         .domain([dataset.xMinValue, dataset.xMaxValue])
         .range([0, this.cw]);
     this.yScale
-        .domain([dataset.yMinValue, dataset.yMaxValue])
+        .domain([dataset.yMinValue-5, dataset.yMaxValue+5])
         .range([this.ch, 0]);
     this.cScale
         .domain(dataset.makes)
@@ -115,7 +139,7 @@ class ScatterPlot extends BaseGraph
 
   showDataset(dataset)
   {
-    this.graphArea = this.dataGroup
+    this.dataGroup
         .selectAll('circle')
         .data(dataset)
         .enter()
@@ -124,6 +148,7 @@ class ScatterPlot extends BaseGraph
         .attr('cy', (d) => {return this.yScale(d[this.axiNameY]);})
         .attr('r', 5)
         .style('fill', (d) => {return this.cScale(d.Make);} )
+        .style('stroke-width',0);
   }
 
   plotLegend(dataset)
@@ -145,6 +170,7 @@ class ScatterPlot extends BaseGraph
         .attr('cy', (d)=>{return legendScale(d);})
         .attr('r', 5)
         .style('fill', (d)=>{return this.cScale(d)})
+        .style('stroke-width',0);
     this.legendGroup
         .selectAll('text')
         .data(dataset.makes)

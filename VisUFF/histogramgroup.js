@@ -13,9 +13,43 @@ class HistogramGroup extends BaseGraph
     this.cScale = d3.scaleOrdinal();
   }
   
+  brushed()
+  {        
+    var s = d3.event.selection,
+        x0 = s[0],
+        x1 = s[1];
+
+    this.dataGroup
+        .selectAll('rect')
+        .style("stroke-width", (d) =>
+        {
+          if(d.class !== undefined)
+          {
+            console.log(d.class);
+            const xPositionIni = this.xScale(d.state) + this.xStepScale(d.class);
+            const xPositionEnd = this.xScale(d.state) + this.xStepScale(d.class) + this.barWidth;
+            if ((xPositionIni >= x0 && xPositionIni <= x1) || (xPositionEnd >= x0 && xPositionEnd <= x1))
+            { 
+              return 1.5;
+            }
+            else 
+            { 
+              return 0;
+            }
+          }
+        });        
+  }
+
   initEvents()
   {
-  
+    this.brush = d3.brushX()
+        .extent([[0, 0], [0, 10]])
+        .on("start brush", this.brushed.bind(this));
+
+    this.dataGroup
+        .append("g")
+        .attr("class", "brush")
+        .call(this.brush);   
   }
 
   preprocessDataset(data)
@@ -95,7 +129,7 @@ class HistogramGroup extends BaseGraph
         .attr('class','state')
         .attr('transform', (data) => {return `translate(${this.xScale(data.state)},0)`;});
     
-    this.appendBars(this.stateArea);
+    this.appendBars();
   }
 
   plotLegend(dataset)
@@ -129,18 +163,20 @@ class HistogramGroup extends BaseGraph
         .text((d)=>{return d;});
   }
 
-  appendBars(groupArea)
+  appendBars()
   {
     this.stateArea
         .selectAll('rect')
-        .data((data)=> {return data.data})
+        .data((data) => { return data.data.map((d)=>{ return {"state":data.state, "class":d[0], "value":d[1]}; }) })
         .enter()
         .append('rect')
+        .attr('class','barInfo')
         .attr('width', this.barWidth)
-        .attr('height', (d) => {return this.ch - this.yScale(d[1])})
-        .attr('x', (d) => {return this.xStepScale(d[0]);})
-        .attr('y', (d) => {return this.yScale(d[1]);})
-        .style('fill', (d) => {return this.cScale(d[0]);});
+        .attr('height', (d) => {return this.ch - this.yScale(d.value)})
+        .attr('x', (d) => {return this.xStepScale(d.class);})
+        .attr('y', (d) => {return this.yScale(d.value);})
+        .style('fill', (d) => {return this.cScale(d.class);})
+        .style('stroke-width',0);
   }
 
 }
