@@ -20,15 +20,15 @@ class HistogramGroup extends BaseGraph
         x1 = s[1];
 
     this.dataGroup
-        .selectAll('rect')
+        .selectAll('.barInfo')
         .style("stroke-width", (d) =>
         {
-          if(d.class !== undefined)
-          {
-            console.log(d.class);
+          // if(d.class !== undefined)
+          // {
+            // console.log(d.class);
             const xPositionIni = this.xScale(d.state) + this.xStepScale(d.class);
             const xPositionEnd = this.xScale(d.state) + this.xStepScale(d.class) + this.barWidth;
-            if ((xPositionIni >= x0 && xPositionIni <= x1) || (xPositionEnd >= x0 && xPositionEnd <= x1))
+            if ((xPositionIni >= x0 && xPositionIni <= x1) || (xPositionEnd >= x0 && xPositionEnd <= x1) || (xPositionIni <= x0 && xPositionEnd >= x1) && (Math.abs(x0 - x1) > 1  ))
             { 
               return 1.5;
             }
@@ -36,7 +36,7 @@ class HistogramGroup extends BaseGraph
             { 
               return 0;
             }
-          }
+          // }
         });        
   }
 
@@ -77,6 +77,8 @@ class HistogramGroup extends BaseGraph
 
     data.minValue = minValue *0.7;
     data.maxValue = maxValue;
+
+    // console.log(data);
   }
 
   configureAxis(dataset)

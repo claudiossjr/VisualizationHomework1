@@ -4,6 +4,7 @@ class TimeSeries extends BaseGraph
   {
     //graphConfig.margins.left = 10;
     super(divHistogram, graphConfig);
+    this.idleTimeout = null;
   }
 
   initAxis()
@@ -16,29 +17,49 @@ class TimeSeries extends BaseGraph
 
   brushed()
   {        
-    var s = d3.event.selection,
-        x0 = s[0],
-        x1 = s[1];
+    const s = d3.event.selection;
+    
+    // If no selection, back to initial coordinate. Otherwise, update X axis domain
+    if(s){
+      console.log(s);
+      const minDate = this.xZoomScale.invert(s[0]);
+      const maxDate = this.xZoomScale.invert(s[1]);
+      this.xScale.domain([ minDate, maxDate ]);
+      // console.log(this.brush);
 
-    this.dataGroup
-        .selectAll('line')
-        .style("stroke-width", (d) =>
-        {
-          if(d.class !== undefined)
-          {
-            console.log(d.class);
-            const xPositionIni = this.xScale(d.state) + this.xStepScale(d.class);
-            const xPositionEnd = this.xScale(d.state) + this.xStepScale(d.class) + this.barWidth;
-            if ((xPositionIni >= x0 && xPositionIni <= x1) || (xPositionEnd >= x0 && xPositionEnd <= x1))
-            { 
-              return 1.5;
-            }
-            else 
-            { 
-              return 0;
-            }
-          }
-        });        
+      // this.mainSVG.select(".brush").call(this.brush.move);
+    }
+
+    // // Update axis and line position
+    // xAxis.transition().duration(1000).call(d3.axisBottom(x))
+    // line
+    //     .select('.line')
+    //     .transition()
+    //     .duration(1000)
+    //     .attr("d", d3.line()
+    //       .x(function(d) { return x(d.date) })
+    //       .y(function(d) { return y(d.value) })
+    //     )
+
+    // this.dataGroup
+    //     .selectAll('line')
+    //     .style("stroke-width", (d) =>
+    //     {
+    //       if(d.class !== undefined)
+    //       {
+    //         console.log(d.class);
+    //         const xPositionIni = this.xScale(d.state) + this.xStepScale(d.class);
+    //         const xPositionEnd = this.xScale(d.state) + this.xStepScale(d.class) + this.barWidth;
+    //         if ((xPositionIni >= x0 && xPositionIni <= x1) || (xPositionEnd >= x0 && xPositionEnd <= x1))
+    //         { 
+    //           return 1.5;
+    //         }
+    //         else 
+    //         { 
+    //           return 0;
+    //         }
+    //       }
+    //     });        
   }
 
   initEvents()
@@ -46,6 +67,8 @@ class TimeSeries extends BaseGraph
     this.brush = d3.brushX()
         .extent([[0, 0], [this.cw, 50]])
         .on("start brush", this.brushed.bind(this));
+
+    // console.log(this.brush);
 
     this.mainSVG
         .append("g")
@@ -138,13 +161,17 @@ class TimeSeries extends BaseGraph
 
     this.cScale
         .domain(this.infoToLookUp)
-        .range(randomColor(this.infoToLookUp.length));
+        .range(['rgba(255,0,0,0.7)','rgba(0,255,0,0.7)','rgba(0,0,255,0.7)','rgba(0,0,0,0.7)']);
+
+    this.xZoomScale = d3.scaleTime()
+        .domain([dataset.xMinValue, dataset.xMaxValue])
+        .range([0, this.cw]);
 
     this.xAxisGroupZoom = this.mainSVG.append('g')
         .attr('class', 'xAxis')
         .attr('transform', `translate(${this._graphConfig.margins.left}, ${this._graphConfig.margins.top + this.ch + (this._graphConfig.margins.bottom/2)})`);
-    this.xAxis = d3.axisBottom(this.xScale);
-    this.xAxisGroupZoom.call(this.xAxis);
+    this.xZoomAxis = d3.axisBottom(this.xZoomScale);
+    this.xAxisGroupZoom.call(this.xZoomAxis);
   }
 
   showDataset(dataset)
