@@ -13,6 +13,13 @@ class HistogramGroup extends BaseGraph
     this.cScale = d3.scaleOrdinal();
   }
   
+  zoomed()
+  {
+    this.xStepScale.range([0, this.cw].map(d => d3.event.transform.applyX(d)));
+    this.mainSVG.selectAll(".barInfo").attr("x", d => this.xStepScale(d.state)).attr("width", this.xStepScale.bandwidth());
+    this.mainSVG.selectAll(".x-axis").call(this.xAxis);
+  }
+
   brushed()
   {        
     var s = d3.event.selection,
@@ -50,6 +57,17 @@ class HistogramGroup extends BaseGraph
         .append("g")
         .attr("class", "brush")
         .call(this.brush);   
+
+    const extent = [[0, 0], [this.cw, this.ch]];
+    console.log(extent);
+    this.zoom = d3.zoom()
+        .scaleExtent([1, 8])
+        .translateExtent(extent)
+        .extent(extent)
+        .on("zoom", this.zoomed.bind(this));
+    
+    this.mainSVG
+        .call(this.zoom);
   }
 
   preprocessDataset(data)
