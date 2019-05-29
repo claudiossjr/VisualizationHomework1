@@ -20,10 +20,14 @@ class HistogramGroup extends BaseGraph
     this.dataGroup
         .selectAll(".state")
         .attr('transform', (data) => {return `translate(${this.xScale(data.state)},0)`;});
+    let nGroup = this.dataGroup.selectAll('.state').size();
+    let nBar = this.dataGroup.selectAll(".barInfo").size();
+    let barPerGroup = nBar/nGroup;
+    let nBarWidth = this.xScale.bandwidth() / barPerGroup;
     this.dataGroup
         .selectAll(".barInfo")
         .attr("x", (d) => {return this.xStepScale(d.class)})
-        .attr("width", this.barWidth);
+        .attr("width", nBarWidth);
     this.xAxisGroup.call(this.xAxis);
   }
 

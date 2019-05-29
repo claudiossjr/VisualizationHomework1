@@ -49,8 +49,46 @@ class ScatterPlot extends BaseGraph
         });        
   }
 
+  zoomed()
+  {
+    this.dataGroup.selectAll('circle')
+        .attr("transform", d3.event.transform);
+    this.xAxisGroup.call(this.xAxis.scale(d3.event.transform.rescaleX(this.xScale)));
+    let nXScale = this.xAxis.scale();
+    this.yAxisGroup.call(this.yAxis.scale(d3.event.transform.rescaleY(this.yScale)));
+    let nYScale = this.yAxis.scale();
+        // .attr("cx", (d)=>{return nXScale(d[this.axiNameX]);})
+        // .attr("cy", (d)=>{return nYScale(d[this.axiNameY]);});
+
+    // this.dataGroup.selectAll(.circle)
+    // this.xScale.range([0, this.cw].map(d => d3.event.transform.applyX(d)));
+    // this.xStepScale.range([0, this.xScale.bandwidth()]);
+    // this.dataGroup
+    //     .selectAll(".state")
+    //     .attr('transform', (data) => {return `translate(${this.xScale(data.state)},0)`;});
+    // let nGroup = this.dataGroup.selectAll('.state').size();
+    // let nBar = this.dataGroup.selectAll(".barInfo").size();
+    // let barPerGroup = nBar/nGroup;
+    // let nBarWidth = this.xScale.bandwidth() / barPerGroup;
+    // this.dataGroup
+    //     .selectAll(".barInfo")
+    //     .attr("x", (d) => {return this.xStepScale(d.class)})
+    //     .attr("width", nBarWidth);
+    // this.xAxisGroup.call(this.xAxis);
+  }
+
   initEvents()
   {
+    const extent = [[this._graphConfig.margins.left, this._graphConfig.margins.top], [this.cw, this.ch]];
+    this.zoom = d3.zoom()
+        .scaleExtent([1, 8])
+        .translateExtent(extent)
+        .extent(extent)
+        .on("zoom", this.zoomed.bind(this));
+    
+    this.mainSVG
+        .call(this.zoom);
+
     this.brush = d3.brush()
         .extent([[0, 0], [this.cw, this.ch]])
         .on("start brush", this.brushed.bind(this));
