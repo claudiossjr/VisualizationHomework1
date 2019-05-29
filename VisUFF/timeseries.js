@@ -17,49 +17,19 @@ class TimeSeries extends BaseGraph
 
   brushed()
   {        
-    const s = d3.event.selection;
+    let s = d3.event.selection;
     
     // If no selection, back to initial coordinate. Otherwise, update X axis domain
     if(s){
-      console.log(s);
+      if(Math.abs(s[0]-s[1]) <= 1) s = this.xZoomScale.range(); 
       const minDate = this.xZoomScale.invert(s[0]);
       const maxDate = this.xZoomScale.invert(s[1]);
+      // console.log(minDate, maxDate);
       this.xScale.domain([ minDate, maxDate ]);
-      // console.log(this.brush);
+      this.xAxis = d3.axisBottom(this.xScale);
+      this.xAxisGroup.call(this.xAxis);
 
-      // this.mainSVG.select(".brush").call(this.brush.move);
-    }
-
-    // // Update axis and line position
-    // xAxis.transition().duration(1000).call(d3.axisBottom(x))
-    // line
-    //     .select('.line')
-    //     .transition()
-    //     .duration(1000)
-    //     .attr("d", d3.line()
-    //       .x(function(d) { return x(d.date) })
-    //       .y(function(d) { return y(d.value) })
-    //     )
-
-    // this.dataGroup
-    //     .selectAll('line')
-    //     .style("stroke-width", (d) =>
-    //     {
-    //       if(d.class !== undefined)
-    //       {
-    //         console.log(d.class);
-    //         const xPositionIni = this.xScale(d.state) + this.xStepScale(d.class);
-    //         const xPositionEnd = this.xScale(d.state) + this.xStepScale(d.class) + this.barWidth;
-    //         if ((xPositionIni >= x0 && xPositionIni <= x1) || (xPositionEnd >= x0 && xPositionEnd <= x1))
-    //         { 
-    //           return 1.5;
-    //         }
-    //         else 
-    //         { 
-    //           return 0;
-    //         }
-    //       }
-    //     });        
+    }   
   }
 
   initEvents()

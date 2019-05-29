@@ -15,9 +15,16 @@ class HistogramGroup extends BaseGraph
   
   zoomed()
   {
-    this.xStepScale.range([0, this.cw].map(d => d3.event.transform.applyX(d)));
-    this.mainSVG.selectAll(".barInfo").attr("x", d => this.xStepScale(d.state)).attr("width", this.xStepScale.bandwidth());
-    this.mainSVG.selectAll(".x-axis").call(this.xAxis);
+    this.xScale.range([0, this.cw].map(d => d3.event.transform.applyX(d)));
+    this.xStepScale.range([0, this.xScale.bandwidth()]);
+    this.dataGroup
+        .selectAll(".state")
+        .attr('transform', (data) => {return `translate(${this.xScale(data.state)},0)`;});
+    this.dataGroup
+        .selectAll(".barInfo")
+        .attr("x", (d) => {return this.xStepScale(d.class)})
+        .attr("width", this.barWidth);
+    this.xAxisGroup.call(this.xAxis);
   }
 
   brushed()
@@ -30,25 +37,32 @@ class HistogramGroup extends BaseGraph
         .selectAll('.barInfo')
         .style("stroke-width", (d) =>
         {
-          // if(d.class !== undefined)
-          // {
-            // console.log(d.class);
-            const xPositionIni = this.xScale(d.state) + this.xStepScale(d.class);
-            const xPositionEnd = this.xScale(d.state) + this.xStepScale(d.class) + this.barWidth;
-            if ((xPositionIni >= x0 && xPositionIni <= x1) || (xPositionEnd >= x0 && xPositionEnd <= x1) || (xPositionIni <= x0 && xPositionEnd >= x1) && (Math.abs(x0 - x1) > 1  ))
-            { 
-              return 1.5;
-            }
-            else 
-            { 
-              return 0;
-            }
-          // }
+          const xPositionIni = this.xScale(d.state) + this.xStepScale(d.class);
+          const xPositionEnd = this.xScale(d.state) + this.xStepScale(d.class) + this.barWidth;
+          if ((xPositionIni >= x0 && xPositionIni <= x1) || (xPositionEnd >= x0 && xPositionEnd <= x1) || (xPositionIni <= x0 && xPositionEnd >= x1) && (Math.abs(x0 - x1) > 1  ))
+          { 
+            return 1.5;
+          }
+          else 
+          { 
+            return 0;
+          }
         });        
   }
 
   initEvents()
   {
+    
+    const extent = [[0, 0], [this.cw, this.ch]];
+    this.zoom = d3.zoom()
+        .scaleExtent([1, 8])
+        .translateExtent(extent)
+        .extent(extent)
+        .on("zoom", this.zoomed.bind(this));
+    
+    this.mainSVG
+        .call(this.zoom);
+  
     this.brush = d3.brushX()
         .extent([[0, 0], [this.cw, this.ch]])
         .on("start brush", this.brushed.bind(this));
@@ -58,16 +72,6 @@ class HistogramGroup extends BaseGraph
         .attr("class", "brush")
         .call(this.brush);   
 
-    const extent = [[0, 0], [this.cw, this.ch]];
-    console.log(extent);
-    this.zoom = d3.zoom()
-        .scaleExtent([1, 8])
-        .translateExtent(extent)
-        .extent(extent)
-        .on("zoom", this.zoomed.bind(this));
-    
-    this.mainSVG
-        .call(this.zoom);
   }
 
   preprocessDataset(data)

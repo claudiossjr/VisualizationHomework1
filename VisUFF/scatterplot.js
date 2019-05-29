@@ -27,7 +27,6 @@ class ScatterPlot extends BaseGraph
 
   brushed()
   {        
-    console.log(d3.event);
     var s = d3.event.selection,
         x0 = s[0][0],
         y0 = s[0][1],
