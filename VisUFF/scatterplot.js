@@ -6,6 +6,9 @@ class ScatterPlot extends BaseGraph
     super(divHistogram, graphConfig);
     this.axiNameX = "";
     this.axiNameY = "";
+    this.radius = 5
+    this.strokeWidth = 1.5;
+    this.ratio = 1; 
   }
 
   setAxiNameX(name)
@@ -33,14 +36,16 @@ class ScatterPlot extends BaseGraph
         x1 = s[1][0],
         y1 = s[1][1];
 
+    let nXScale = this.xAxis.scale();
+    let nYScale = this.yAxis.scale();
     this.dataGroup
         .selectAll('circle')
         .style("stroke-width", (d) =>
         {
-          if ((this.xScale(d[this.axiNameX]) >= x0 && this.xScale(d[this.axiNameX]) <= x1) && 
-              (this.yScale(d[this.axiNameY]) >= y0 && this.yScale(d[this.axiNameY]) <= y1))
+          if ((nXScale(d[this.axiNameX]) >= x0 && nXScale(d[this.axiNameX]) <= x1) && 
+              (nYScale(d[this.axiNameY]) >= y0 && nYScale(d[this.axiNameY]) <= y1))
           { 
-            return 1.5;
+            return this.strokeWidth / this.ratio;
           }
           else 
           { 
@@ -51,30 +56,12 @@ class ScatterPlot extends BaseGraph
 
   zoomed()
   {
+    this.ratio = d3.event.transform.k;
     this.dataGroup.selectAll('circle')
-        .attr("transform", d3.event.transform);
+        .attr("transform", d3.event.transform)
+        .attr("r", this.radius / this.ratio);
     this.xAxisGroup.call(this.xAxis.scale(d3.event.transform.rescaleX(this.xScale)));
-    let nXScale = this.xAxis.scale();
     this.yAxisGroup.call(this.yAxis.scale(d3.event.transform.rescaleY(this.yScale)));
-    let nYScale = this.yAxis.scale();
-        // .attr("cx", (d)=>{return nXScale(d[this.axiNameX]);})
-        // .attr("cy", (d)=>{return nYScale(d[this.axiNameY]);});
-
-    // this.dataGroup.selectAll(.circle)
-    // this.xScale.range([0, this.cw].map(d => d3.event.transform.applyX(d)));
-    // this.xStepScale.range([0, this.xScale.bandwidth()]);
-    // this.dataGroup
-    //     .selectAll(".state")
-    //     .attr('transform', (data) => {return `translate(${this.xScale(data.state)},0)`;});
-    // let nGroup = this.dataGroup.selectAll('.state').size();
-    // let nBar = this.dataGroup.selectAll(".barInfo").size();
-    // let barPerGroup = nBar/nGroup;
-    // let nBarWidth = this.xScale.bandwidth() / barPerGroup;
-    // this.dataGroup
-    //     .selectAll(".barInfo")
-    //     .attr("x", (d) => {return this.xStepScale(d.class)})
-    //     .attr("width", nBarWidth);
-    // this.xAxisGroup.call(this.xAxis);
   }
 
   initEvents()
@@ -183,7 +170,7 @@ class ScatterPlot extends BaseGraph
         .append('circle')
         .attr('cx', (d) => {return this.xScale(d[this.axiNameX]);})
         .attr('cy', (d) => {return this.yScale(d[this.axiNameY]);})
-        .attr('r', 5)
+        .attr('r', this.radius)
         .style('fill', (d) => {return this.cScale(d.Make);} )
         .style('stroke-width',0);
   }
@@ -205,7 +192,7 @@ class ScatterPlot extends BaseGraph
         .append('circle')
         .attr('cx',`${10}`)
         .attr('cy', (d)=>{return legendScale(d);})
-        .attr('r', 5)
+        .attr('r', this.radius)
         .style('fill', (d)=>{return this.cScale(d)})
         .style('stroke-width',0);
     this.legendGroup
