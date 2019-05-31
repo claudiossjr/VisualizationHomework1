@@ -29,6 +29,10 @@ class TimeSeries extends BaseGraph
       this.xAxis = d3.axisBottom(this.xScale);
       this.xAxisGroup.call(this.xAxis);
 
+      this.dataGroup
+          .selectAll('path')
+          .attr('d', this.line);
+
     }   
   }
 
@@ -153,7 +157,7 @@ class TimeSeries extends BaseGraph
 
   appendData(dataInfo)
   {
-    const line = d3.line()
+    this.line = d3.line()
     .x((d) => {
       return this.xScale(d.date);
     })
@@ -169,7 +173,7 @@ class TimeSeries extends BaseGraph
         .attr('id', `priceChart-${dataInfo.key}`)
         .attr('stroke', `${lineColor}`)
         .attr('stroke-width', '1.5')
-        .attr('d', line);
+        .attr('d', this.line);
   }
 
   plotLegend(dataset)
