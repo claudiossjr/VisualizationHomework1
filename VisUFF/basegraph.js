@@ -114,11 +114,6 @@ class BaseGraph
     throw new Error("Init Events Not Implemented.");
   }
 
-  preprocessDataset(dataset)
-  {
-    throw new Error("Preprocess Dataset Not Implemented.");
-  }
-
   configureAxis(dataset)
   {
     throw new Error("Axis Not Configured.");
@@ -141,7 +136,6 @@ class BaseGraph
 
   plotDataset(dataset)
   {
-    this.preprocessDataset(dataset);
     this.configureAxis(dataset);
     this.showDataset(dataset);
     if (this._graphConfig.allowLegend)

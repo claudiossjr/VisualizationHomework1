@@ -42,8 +42,8 @@ class ScatterPlot extends BaseGraph
         .selectAll('circle')
         .style("stroke-width", (d) =>
         {
-          if ((nXScale(d[this.axiNameX]) >= x0 && nXScale(d[this.axiNameX]) <= x1) && 
-              (nYScale(d[this.axiNameY]) >= y0 && nYScale(d[this.axiNameY]) <= y1))
+          if ((nXScale(d[0]) >= x0 && nXScale(d[0]) <= x1) && 
+              (nYScale(d[1]) >= y0 && nYScale(d[1]) <= y1))
           { 
             return this.strokeWidth / this.ratio;
           }
@@ -87,55 +87,6 @@ class ScatterPlot extends BaseGraph
         .call(this.brush);   
   }
 
-  preprocessDataset(dataset)
-  {
-    dataset.makes = dataset.map((data) => {
-      return data.Make;
-    });
-
-    dataset.makes = dataset.makes.filter((data, index) => {
-      return dataset.makes.indexOf(data) === index;
-    });
-
-    let minValue = Number.MAX_VALUE;
-    let maxValue = Number.MIN_VALUE;
-
-    // x Axi xAxiValue
-    dataset.forEach((data)=>{
-      const xAxiValue = Number(data[this.axiNameX]);
-      if (xAxiValue < minValue)
-      {
-        minValue = xAxiValue;
-      }
-      if (xAxiValue > maxValue)
-      {
-        maxValue = xAxiValue;
-      }
-    });
-
-    dataset.xMinValue = Math.round(minValue * 0.8);
-    dataset.xMaxValue = maxValue;
-
-    minValue = Number.MAX_VALUE;
-    maxValue = Number.MIN_VALUE;
-
-    // y Axi yAxiValue
-    dataset.forEach((data) => {
-      const yAxiValue = Number(data[this.axiNameY]);
-      if (yAxiValue < minValue)
-      {
-        minValue = yAxiValue;
-      }
-      if (yAxiValue > maxValue)
-      {
-        maxValue = yAxiValue;
-      }
-    });
-
-    dataset.yMinValue = Math.round(minValue * 0.8);
-    dataset.yMaxValue = maxValue;
-  }
-
   configureAxis(dataset)
   {
     // Configurando eixoX
@@ -159,19 +110,42 @@ class ScatterPlot extends BaseGraph
         .attr('transform', `translate(${this._graphConfig.margins.left}, ${this._graphConfig.margins.top})`)
     this.yAxis = d3.axisLeft(this.yScale);
     this.yAxisGroup.call(this.yAxis);
+
+    if (this.axiNameX.length > 0)
+    {
+      this.mainSVG
+          .append("text")
+          .attr("class", "x label")
+          .attr("text-anchor", "end")
+          .attr("x", this._graphConfig.margins.left + this.cw + 3*this.axiNameX.length)
+          .attr("y", this._graphConfig.margins.top + this.ch + 30)
+          .text(this.axiNameX);
+    }
+
+    if (this.axiNameY.length > 0)
+    {
+      this.mainSVG
+          .append("text")
+          .attr("class", "y label")
+          // .attr("text-anchor", "end")
+          .attr("x", this._graphConfig.margins.left)
+          .attr("y", this._graphConfig.margins.top - 10)
+          .text(this.axiNameY );
+    }
+
   }
 
   showDataset(dataset)
   {
     this.dataGroup
         .selectAll('circle')
-        .data(dataset)
+        .data(dataset.info)
         .enter()
         .append('circle')
-        .attr('cx', (d) => {return this.xScale(d[this.axiNameX]);})
-        .attr('cy', (d) => {return this.yScale(d[this.axiNameY]);})
+        .attr('cx', (d) => {return this.xScale(d[0]);})
+        .attr('cy', (d) => {return this.yScale(d[1]);})
         .attr('r', this.radius)
-        .style('fill', (d) => {return this.cScale(d.Make);} )
+        .style('fill', (d) => {return this.cScale(d[2]);} )
         .style('stroke-width',0);
   }
 
@@ -184,7 +158,7 @@ class ScatterPlot extends BaseGraph
     this.mainSVG
         .append('text')
         .attr('transform', `translate(${this._graphConfig.dims.width - this._graphConfig.margins.right + 30},${this._graphConfig.margins.top})`)
-        .text('Graph Legend');
+        .text('Legenda');
     this.legendGroup
         .selectAll('circle')
         .data(dataset.makes)

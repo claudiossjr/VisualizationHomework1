@@ -19,14 +19,14 @@ class HistogramGroup extends BaseGraph
     this.xStepScale.range([0, this.xScale.bandwidth()]);
     this.dataGroup
         .selectAll(".state")
-        .attr('transform', (data) => {return `translate(${this.xScale(data.state)},0)`;});
+        .attr('transform', (data) => {return `translate(${this.xScale(data.class)},0)`;});
     let nGroup = this.dataGroup.selectAll('.state').size();
     let nBar = this.dataGroup.selectAll(".barInfo").size();
     let barPerGroup = nBar/nGroup;
     let nBarWidth = this.xScale.bandwidth() / barPerGroup;
     this.dataGroup
         .selectAll(".barInfo")
-        .attr("x", (d) => {return this.xStepScale(d.class)})
+        .attr("x", (d) => {return this.xStepScale(d.subClass)})
         .attr("width", nBarWidth);
     this.xAxisGroup.call(this.xAxis);
   }
@@ -41,8 +41,8 @@ class HistogramGroup extends BaseGraph
         .selectAll('.barInfo')
         .style("stroke-width", (d) =>
         {
-          const xPositionIni = this.xScale(d.state) + this.xStepScale(d.class);
-          const xPositionEnd = this.xScale(d.state) + this.xStepScale(d.class) + this.barWidth;
+          const xPositionIni = this.xScale(d.class) + this.xStepScale(d.subClass);
+          const xPositionEnd = this.xScale(d.class) + this.xStepScale(d.subClass) + this.barWidth;
           if ((xPositionIni >= x0 && xPositionIni <= x1) || (xPositionEnd >= x0 && xPositionEnd <= x1) || (xPositionIni <= x0 && xPositionEnd >= x1) && (Math.abs(x0 - x1) > 1  ))
           { 
             return 1.5;
@@ -78,49 +78,21 @@ class HistogramGroup extends BaseGraph
 
   }
 
-  preprocessDataset(data)
-  {
-    let minValue = Number.MAX_VALUE;
-    let maxValue = Number.MIN_VALUE;
-    data.states = data.dataset.map(element => {
-      return element.state;
-    });
-
-    data.dataset.forEach((element) => {
-      element.data.forEach((elemItem) => {
-        const classElemValue = elemItem[1];
-        if (classElemValue < minValue)
-        {
-          minValue = classElemValue;
-        }
-
-        if (classElemValue > maxValue)
-        {
-          maxValue = classElemValue;
-        }
-      });
-    });
-
-    data.minValue = minValue *0.7;
-    data.maxValue = maxValue;
-
-    // console.log(data);
-  }
 
   configureAxis(dataset)
   {
     // ### InitAxis Domain and Value
     // Create xScale
     this.xScale
-        .domain(dataset.states)
+        .domain(dataset.classes)
         .range([0,this.cw])
         .paddingInner(.1)
         .paddingOuter(.05)
         .round(true);
 
-    this.barWidth = Math.round((this.xScale.bandwidth()/dataset.classes.length)-this.xScale.paddingInner());
+    this.barWidth = Math.round((this.xScale.bandwidth()/dataset.subClasses.length)-this.xScale.paddingInner());
     this.xStepScale
-        .domain(dataset.classes)
+        .domain(dataset.subClasses)
         .range([0,this.xScale.bandwidth()]);
 
     // Create yScale
@@ -142,8 +114,30 @@ class HistogramGroup extends BaseGraph
     this.yAxisGroup.call(this.yAxis);
     
     this.cScale
-        .domain(dataset.classes)
-        .range(randomColor(dataset.classes.length));
+        .domain(dataset.subClasses)
+        .range(randomColor(dataset.subClasses.length));
+
+    if (this._graphConfig.xLabel.length > 0)
+    {
+      this.mainSVG
+          .append("text")
+          .attr("class", "x label")
+          .attr("text-anchor", "end")
+          .attr("x", this._graphConfig.margins.left + this.cw + 3*this._graphConfig.xLabel.length)
+          .attr("y", this._graphConfig.margins.top + this.ch + 15)
+          .text(this._graphConfig.xLabel);
+    }
+
+    if (this._graphConfig.yLabel.length > 0)
+    {
+      this.mainSVG
+          .append("text")
+          .attr("class", "y label")
+          // .attr("text-anchor", "end")
+          .attr("x", this._graphConfig.margins.left)
+          .attr("y", this._graphConfig.margins.top - 10)
+          .text(this._graphConfig.yLabel );
+    }
 
   }
 
@@ -155,7 +149,7 @@ class HistogramGroup extends BaseGraph
         .enter()
         .append('g')
         .attr('class','state')
-        .attr('transform', (data) => {return `translate(${this.xScale(data.state)},0)`;});
+        .attr('transform', (data) => {return `translate(${this.xScale(data.class)},0)`;});
     
     this.appendBars();
   }
@@ -164,16 +158,16 @@ class HistogramGroup extends BaseGraph
   {
 
     const legendScale = d3.scaleBand()
-                          .domain(dataset.classes)
+                          .domain(dataset.subClasses)
                           .range([20,this.ch]);
 
     this.mainSVG
         .append('text')
         .attr('transform', `translate(${this._graphConfig.dims.width - this._graphConfig.margins.right + 30},${this._graphConfig.margins.top})`)
-        .text('Graph Legend');
+        .text('Legenda');
     this.legendGroup
         .selectAll('rect')
-        .data(dataset.classes)
+        .data(dataset.subClasses)
         .enter()
         .append('rect')
         .attr('x',`${10}`)
@@ -183,7 +177,7 @@ class HistogramGroup extends BaseGraph
         .style('fill', (d)=>{return this.cScale(d)});
     this.legendGroup
         .selectAll('text')
-        .data(dataset.classes)
+        .data(dataset.subClasses)
         .enter()
         .append('text')
         .attr('x',`${10+30}`)
@@ -195,15 +189,15 @@ class HistogramGroup extends BaseGraph
   {
     this.stateArea
         .selectAll('rect')
-        .data((data) => { return data.data.map((d)=>{ return {"state":data.state, "class":d[0], "value":d[1]}; }) })
+        .data((data) => { return data.info; })
         .enter()
         .append('rect')
         .attr('class','barInfo')
         .attr('width', this.barWidth)
         .attr('height', (d) => {return this.ch - this.yScale(d.value)})
-        .attr('x', (d) => {return this.xStepScale(d.class);})
+        .attr('x', (d) => {return this.xStepScale(d.subClass);})
         .attr('y', (d) => {return this.yScale(d.value);})
-        .style('fill', (d) => {return this.cScale(d.class);})
+        .style('fill', (d) => {return this.cScale(d.subClass);})
         .style('stroke-width',0);
   }
 

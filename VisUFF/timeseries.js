@@ -5,6 +5,18 @@ class TimeSeries extends BaseGraph
     //graphConfig.margins.left = 10;
     super(divHistogram, graphConfig);
     this.idleTimeout = null;
+    this.axiNameX = "";
+    this.axiNameY = "";
+  }
+
+  setAxiNameX(name)
+  {
+    this.axiNameX = name;
+  }
+
+  setAxiNameY(name)
+  {
+    this.axiNameY = name;
   }
 
   initAxis()
@@ -12,7 +24,7 @@ class TimeSeries extends BaseGraph
     this.xScale = d3.scaleTime();
     this.yScale = d3.scaleLinear();
     this.cScale = d3.scaleOrdinal();
-    this.infoToLookUp = ['open','high','low', 'closure'];
+    
   }
 
   brushed()
@@ -42,8 +54,6 @@ class TimeSeries extends BaseGraph
         .extent([[0, 0], [this.cw, 50]])
         .on("start brush", this.brushed.bind(this));
 
-    // console.log(this.brush);
-
     this.mainSVG
         .append("g")
         .attr("class", "brush")
@@ -51,63 +61,6 @@ class TimeSeries extends BaseGraph
         .attr('height', 30)
         .attr('transform', `translate(${this._graphConfig.margins.left},${this._graphConfig.dims.height - this._graphConfig.margins.bottom + 30})`)
         .call(this.brush);   
-  }
-
-  preprocessDataset(dataset)
-  {
-    let yMin = Number.MAX_VALUE;
-    let yMax = Number.MIN_VALUE;
-
-    dataset.info = [];
-
-    this.infoToLookUp.filter((d)=>{ return d !== "volume"})
-        .forEach((data) => {
-      
-      const tempArray = [];
-      for(let key in dataset.TimeSeries)
-      {
-        const stepInfo = dataset.TimeSeries[key];
-        const info = Number.parseFloat(stepInfo[data]);
-        const arrDate = parseDate(key);
-        const date = new Date(arrDate[0],arrDate[1]-1,arrDate[2], arrDate[3],arrDate[4], arrDate[5]);
-        tempArray.push({"date":date, "price":info});
-      }
-      
-      const arrayMin = d3.min(tempArray, (d) => {
-        return d.price;
-      });
-
-      const arrayMax = d3.max(tempArray, (d) => {
-        return d.price;
-      });
-
-      if(arrayMin < yMin)
-      {
-        yMin = arrayMin;
-      }
-
-      if(arrayMax > yMax)
-      {
-        yMax = arrayMax;
-      }
-
-      dataset.info.push({"key":data, "value": tempArray});
-    });
-
-    const xMin = d3.min(dataset.info[0].value, (d) => {
-      return d.date;
-    });
-
-    const xMax = d3.max(dataset.info[0].value, (d) => {
-      return d.date;
-    });
-
-    dataset.xMinValue = xMin;
-    dataset.xMaxValue = xMax;
-
-    dataset.yMinValue = yMin;
-    dataset.yMaxValue = yMax;
-
   }
 
   configureAxis(dataset)
@@ -134,7 +87,7 @@ class TimeSeries extends BaseGraph
     this.yAxisGroup.call(this.yAxis);
 
     this.cScale
-        .domain(this.infoToLookUp)
+        .domain(dataset.infoToLookUp)
         .range(['rgba(255,0,0,0.7)','rgba(0,255,0,0.7)','rgba(0,0,255,0.7)','rgba(0,0,0,0.7)']);
 
     this.xZoomScale = d3.scaleTime()
@@ -146,6 +99,29 @@ class TimeSeries extends BaseGraph
         .attr('transform', `translate(${this._graphConfig.margins.left}, ${this._graphConfig.margins.top + this.ch + (this._graphConfig.margins.bottom/2)})`);
     this.xZoomAxis = d3.axisBottom(this.xZoomScale);
     this.xAxisGroupZoom.call(this.xZoomAxis);
+
+    if (this.axiNameX.length > 0)
+    {
+      this.mainSVG
+          .append("text")
+          .attr("class", "x label")
+          .attr("text-anchor", "end")
+          .attr("x", this._graphConfig.margins.left + this.cw + 3*this.axiNameX.length)
+          .attr("y", this._graphConfig.margins.top + this.ch + 30)
+          .text(this.axiNameX);
+    }
+
+    if (this.axiNameY.length > 0)
+    {
+      this.mainSVG
+          .append("text")
+          .attr("class", "y label")
+          // .attr("text-anchor", "end")
+          .attr("x", this._graphConfig.margins.left + this.cw)
+          .attr("y", this._graphConfig.margins.top - 10)
+          .text(this.axiNameY );
+    }
+
   }
 
   showDataset(dataset)
@@ -184,7 +160,7 @@ class TimeSeries extends BaseGraph
     this.mainSVG
         .append('text')
         .attr('transform', `translate(${this._graphConfig.dims.width - this._graphConfig.margins.right + 40},${this._graphConfig.margins.top})`)
-        .text('Graph Legend');
+        .text('Legenda');
 
     this.legendGroup
         .selectAll('rect')
